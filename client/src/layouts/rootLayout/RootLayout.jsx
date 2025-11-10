@@ -1,49 +1,38 @@
-import { Outlet } from "react-router-dom";
-import "./rootLayout.css";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/clerk-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ✅ Correct environment variable usage
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  console.error("❌ Missing Clerk Publishable Key! Please set it in Netlify Environment Variables.");
-}
-
-const queryClient = new QueryClient();
+import { supabase } from '../lib/supabase'
+import { useState, useEffect } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 const RootLayout = () => {
-  return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <QueryClientProvider client={queryClient}>
-        <div className="rootLayout">
-          <header>
-            <a href="/" className="logo">
-              <img src="/logo.png" alt="" />
-              <span>AI TUTOR</span>
-            </a>
-            <div className="user">
-              <SignedOut>
-                <SignInButton />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </header>
-          <main>
-            <Outlet />
-          </main>
-        </div>
-      </QueryClientProvider>
-    </ClerkProvider>
-  );
-};
+  const [session, setSession] = useState(null)
+  const navigate = useNavigate()
 
-export default RootLayout;
+  useEffect(() => {
+    const currentSession = supabase.auth.session()
+    setSession(currentSession)
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (!session) navigate('/sign-in')
+    })
+  }, [])
+
+  return (
+    <div className="rootLayout">
+      <header>
+        <a href="/" className="logo">AI TUTOR</a>
+        <div className="user">
+          {session ? (
+            <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
+          ) : (
+            <button onClick={() => navigate('/sign-in')}>Sign In</button>
+          )}
+        </div>
+      </header>
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  )
+}
+
+export default RootLayout
