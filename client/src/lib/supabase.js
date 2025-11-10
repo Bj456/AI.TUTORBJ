@@ -1,12 +1,10 @@
-// src/lib/supabase.js
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-// Environment variables from Netlify
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("❌ Supabase URL or ANON key is missing! Please set them in Netlify Environment Variables.")
+  console.error("❌ Missing Supabase URL or ANON KEY. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
